@@ -22,10 +22,15 @@ class GoBang {
 
   init () {
 
-    this.role = 2;
+    this.role = 1;
+
+    this.win = false;
 
     this.history = [];
     this.currentStep = 0;
+
+    this.chessmans.onclick = null;
+    this.chessmans.innerHTML = '';
 
     this.drawChessboard();
     this.initChessMatrix();
@@ -65,6 +70,11 @@ class GoBang {
     chessman.style.left = (x * this.grid.width) - this.grid.width * 0.25;
     chessman.style.top = (y * this.grid.height) - this.grid.height * 0.25; 
     this.chessmans.appendChild(chessman)
+
+    setTimeout(() => {
+      this.checkIfWin(x, y, isBlack ? 1 : 2)
+    }, 0)
+    
   }
   
   listenChessman () {
@@ -83,6 +93,7 @@ class GoBang {
         this.checkboard[x][y] = this.role
         this.drawChessmans(x, y, Object.is(this.role, 1))
 
+        // 保证了悔棋，撤销的操作的正确性
         this.history.length = this.currentStep;
         this.history.push({x, y, role: this.role});
         this.currentStep++;
@@ -92,7 +103,67 @@ class GoBang {
     }
   }
 
-  checkIfWin () {
-    
+  checkIfWin (x, y, role) {
+    if (!x || !y || !role) return;
+
+    let count = 0
+
+    const XVector = this.checkboard.map(x => x[y]);
+    const YVector = this.checkboard[x];
+    const leftVector = [];
+    const rightVector = [];
+
+    this.checkboard.forEach((vec, i) => {
+      
+      const leftItem = vec[y-(x-i)];
+      if (leftItem !== undefined) {
+        leftVector.push(leftItem)
+      }
+
+      const rightItem = vec[y+(x-i)];
+      if (rightItem !== undefined) {
+        rightVector.push(rightItem)
+      }
+    });
+
+    [XVector, YVector, leftVector, rightVector].forEach(axis => {
+      if (axis.some((x, i) => axis[i] !== 0 &&　
+      axis[i-2] === axis[i-1] && axis[i-1] === axis[i] && 
+      axis[i] === axis[i+1] && axis[i+1] === axis[i+2] )) {
+
+        count++;
+      }
+    })
+
+    if (count) {
+      this.chessmans.onclick = null;
+      this.win = true;
+
+      alert((role == 1 ? '黑' : '白') + '子胜');
+    }
+  }
+
+  retractGame () {
+
+    if (this.history.length && !this.win) {
+      const prevStep = this.history[this.currentStep - 1];
+      if (prevStep) {
+        const {x, y, role} = prevStep;
+        const chessman = document.getElementById(`x${x}-y${y}-r${role}`);
+        this.chessmans.removeChild(chessman);
+        this.checkboard[x][y] = 0;
+        this.currentStep--
+      }
+    }
+  }
+
+  revoke () {
+
+    const next = this.history[this.currentStep];
+    if (next) {
+      this.drawChessmans(next.x, next.y, next.role === 1);
+      this.checkboard[next.x][next.y] = next.role;
+      this.currentStep++;
+    }
   }
 }

@@ -59,19 +59,38 @@
       #game > .chessmans > .chessman.white {
         background:radial-gradient(15px 15px at 15px 15px,#fff,#e2e2e2);
         box-shadow:2px 2px 4px rgba(0,0,0,0.3);
-      }      
+      }
+
+      #tool {
+        display: flex;
+        justify-content: center;
+      }
+
+      #tool > button {
+        margin: 0 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        background-color: #eee;
+        border: none;
+      } 
     </style>
 
-    <script src="./src/index.js"></script>
+    <script src="./dist/index.js"></script>
   </head>
   <body>
     <div id="game">
       <div id="chessboard" class="chessboard"></div>
       <div id="chessmans" class="chessmans"></div>
     </div>
+    <div id="tool">
+      <button onclick="game.init()">开始/重置</button>
+      <button onclick="game.retractGame()">悔棋</button>
+      <button onclick="game.revoke()">撤销</button>
+    </div>
 
     <script>
-      const game = new GoBang({
+      var game = new GoBang({
         selector: 'game',
         style: {
           padding: 20,
