@@ -1,3 +1,5 @@
+//window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
 class Meteor {
 
   constructor(options) {
@@ -15,23 +17,23 @@ class Meteor {
       height: this.canvas.height
     }
     this.context = this.canvas.getContext('2d')
-    this.context.fillStyle = 'black'
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
 
     this.stars = []
     this.meteors = []
 
     this.init()
+
   }
 
   init() {
 
     this.drawStars()
-    //this.drawMeteor()
 
     setInterval(() => { this.starAnimate() }, 200)
+
+    this.drawMeteor()
     
-    //this.meteorAnimate()
+    setInterval(() => { this.meteorAnimate() }, 20)
   }
 
   drawStars() {
@@ -43,13 +45,34 @@ class Meteor {
     }
   }
 
+  drawMeteor () {
+    for (var i=0; i< 20; i++) {
+      const meteor = new MeteorRain(this.rect)
+      meteor.draw(this.context)
+
+      this.meteors.push(meteor)
+    }
+  }
+
   starAnimate() {
     for (var i=0; i<this.stars.length; i++) {
       this.stars[i].getRandomColor()
       this.stars[i].draw(this.context)
     }
+    
   }
 
+  meteorAnimate() {
+    for(var i=0; i<this.meteors.length; i++) {
+      this.meteors[i].move(this.context)
+      if (this.meteors[i].y > this.rect.height + 100)　{
+        
+        const meteor = new MeteorRain(this.rect)
+        meteor.draw(this.context)
+        this.meteors[i] = meteor
+      }
+    }
+  }
 }
 
 class Star {
@@ -76,5 +99,79 @@ class Star {
     context.strokeStyle = this.color
     context.stroke()
     context.closePath()
+  }
+}
+
+class MeteorRain {
+
+  constructor (rect) {
+    this.alpha = 1
+    this.angle = 30 + Math.random() * 5
+    this.speed = Math.ceil(Math.random() + 0.5) * 10
+
+    const x = Math.random() * 80 + 100
+    var cos = Math.cos(this.angle * 3.14/180)
+    var sin = Math.sin(this.angle * 3.14/180)
+
+    this.length = Math.ceil(x)
+
+    this.width = this.length * cos
+    this.height = this.length * sin
+
+    this.offset_x = this.speed * cos 
+    this.offset_y = this.speed * sin 
+
+    // 画布的大小
+    this.rect = rect
+
+    this.getPos()
+  }
+
+  computePos () {
+    this.x = this.x - this.offset_x
+    this.y = this.y + this.offset_y
+  }
+
+  getPos () {
+    this.x = this.rect.width * Math.random()
+    this.y = this.rect.height * Math.random()
+  }
+
+  draw (context) {
+    context.save()
+    context.beginPath()
+    context.lineWidth = 2.5
+    context.globalAlpha = this.alpha
+
+    let line = context.createLinearGradient(this.x, this.y, this.x + this.width, this.y - this.height)
+    line.addColorStop(0, 'rgba(255, 255, 255, 1)')
+    line.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+    if(this.alpha < 0) {
+      this.alpha = - this.alpha
+    }
+
+    context.strokeStyle = line
+    context.moveTo(this.x, this.y)
+    context.lineTo(this.x+this.width, this.y - this.height)
+
+    context.closePath()
+    context.stroke()
+    context.restore()
+  }
+
+  move (context) {
+    let x = this.x + this.width - this.offset_x;
+    let y = this.y - this.height
+
+    this.alpha -= 0.02
+
+    this.computePos()
+
+    
+    context.clearRect(this.x-this.offset_x, y, this.width+this.offset_x, this.height)
+    
+
+    this.draw(context)
   }
 }
