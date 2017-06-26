@@ -1,0 +1,54 @@
+<!DOCTYPE>
+<html>
+  <head>
+    <title>Flex测试</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      header {
+        flex: 0 0 50px;
+        background-color: gray;
+      }
+
+      .main {
+        flex: 1;
+        display: flex;
+      }
+
+      .main nav {
+        flex: 0 0 240px;
+        background-color: red;
+      }
+
+      .main .con {
+        background-color: green;
+        flex: 1;
+        min-width: 600px;
+      }
+
+      footer {
+        flex: 0 0 100px;
+        background-color: grey;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header></header>
+      <div class="main">
+        <nav></nav>
+        <div class="con"></div>
+      </div>
+      <footer></footer>
+    </div>
+  </body>
+</html>
